@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -8,12 +10,18 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-mongoose.connect("mongodb://localhost:27017/taskmanager", {
+const dbURI = process.env.MONGODB_URI || 'mongodb+srv://sathwikpentakoti:Sai4575@cluster0.czdmnzx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+
+mongoose.connect(dbURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log("MongoDB connected"))
-.catch((err) => console.error("MongoDB connection error:", err));
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+  });
 
 // Task Schema
 const leadSchema = new mongoose.Schema({
