@@ -13,8 +13,6 @@ app.use(express.json());
 const dbURI = process.env.MONGODB_URI || 'mongodb+srv://sathwikpentakoti:Sai4575@cluster0.czdmnzx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(dbURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
 })
   .then(() => {
     console.log('Connected to MongoDB');
