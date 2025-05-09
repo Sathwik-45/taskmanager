@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <!-- Custom CSS -->
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        scroll-behavior: smooth;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f4f7fa;
+      }
+
+      nav.navbar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background-color: #003366;
+      }
+
+      nav .nav-link {
+        color: #fff !important;
+        font-weight: 500;
+      }
+
+      section {
+        min-height: 100vh;
+        padding-top: 90px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f4f7fa;
+      }
+
+      .content-box {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      #home-section {
+        background: linear-gradient(135deg, #e3f2fd, #fce4ec);
+        text-align: center;
+      }
+
+      .home-icon {
+        font-size: 90px;
+        color: #003366;
+        animation: bounce 2s infinite;
+      }
+
+      .home-text {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #003366;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .btn-icon-only {
+        background: none;
+        border: none;
+        color: #dc3545;
+        font-size: 1.2rem;
+      }
+
+      .btn-icon-only:hover {
+        color: #a71d2a;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Task Manager</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="#home-section">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#task-section">Add Task</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#task-list">View Tasks</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home-section">
+      <div class="content-box text-center">
+        <i class="bi bi-journal-check home-icon"></i>
+        <div class="home-text">
+          <i class="bi bi-info-circle"></i>
+          Add Your Task or Check Your Pending Tasks
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Task Section -->
+    <section id="task-section">
+      <div class="content-box">
+        <h2 class="text-center mb-4">
+          <i class="bi bi-plus-circle"></i> Add New Task
+        </h2>
+        <form id="leadform">
+          <div class="mb-3">
+            <label for="task" class="form-label">Task:</label>
+            <input
+              type="text"
+              name="task"
+              id="task"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="deadline" class="form-label">Deadline:</label>
+            <input
+              type="text"
+              name="deadline"
+              id="deadline"
+              class="form-control"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            Submit
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- View Tasks Section -->
+    <section id="task-list">
+      <div class="content-box">
+        <h2 class="text-center mb-4">
+          <i class="bi bi-list-task"></i> Manage Tasks
+        </h2>
+        <ul id="tasks" class="list-group">
+          <!-- Task items will appear here -->
+        </ul>
+      </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <!-- Script Logic -->
+    <script>
+      document
+        .getElementById("leadform")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const task = document.getElementById("task").value;
+          const deadline = document.getElementById("deadline").value;
+
+          if (task && deadline) {
+            fetch("http://localhost:5000/api/task", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ task, deadline }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                alert(data.message || "Task submitted successfully!");
+                document.getElementById("leadform").reset();
+                loadTasks();
+              })
+              .catch((err) => {
+                alert("Failed to submit task.");
+                console.error(err);
+              });
+          } else {
+            alert("Please fill in both fields.");
+          }
+        });
+
+      function loadTasks() {
+        fetch("http://localhost:5000/api/tasks")
+          .then((res) => res.json())
+          .then((tasks) => {
+            const taskList = document.getElementById("tasks");
+            taskList.innerHTML = "";
+            tasks.forEach((task) => {
+              const taskItem = document.createElement("li");
+              taskItem.classList.add("list-group-item");
+              taskItem.innerHTML = `
+                <span><strong>${task.task}</strong> - ${task.deadline}</span>
+                <button class="btn-icon-only" onclick="deleteTask('${task._id}')">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              `;
+              taskList.appendChild(taskItem);
+            });
+          })
+          .catch((err) => console.error("Error fetching tasks:", err));
+      }
+
+      function deleteTask(id) {
+        fetch(`http://localhost:5000/api/task/${id}`, {
+          method: "DELETE",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            alert(data.message || "Task deleted successfully!");
+            loadTasks();
+          })
+          .catch((err) => console.error("Error deleting task:", err));
+      }
+
+      window.onload = loadTasks;
+    </script>
+  </body>
+</html>
