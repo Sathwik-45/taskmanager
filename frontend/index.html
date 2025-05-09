@@ -214,7 +214,7 @@
           const deadline = document.getElementById("deadline").value;
 
           if (task && deadline) {
-            fetch("http://localhost:5000/api/task", {
+            fetch("https://taskmanager-lq53.onrender.com/api/task", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ task, deadline }),
@@ -235,7 +235,7 @@
         });
 
       function loadTasks() {
-        fetch("http://localhost:5000/api/tasks")
+        fetch("https://taskmanager-lq53.onrender.com/api/tasks")
           .then((res) => res.json())
           .then((tasks) => {
             const taskList = document.getElementById("tasks");
@@ -256,7 +256,7 @@
       }
 
       function deleteTask(id) {
-        fetch(`http://localhost:5000/api/task/${id}`, {
+        fetch(`http://taskmanager-lq53.onrender.com/api/task/${id}`, {
           method: "DELETE",
         })
           .then((res) => res.json())
