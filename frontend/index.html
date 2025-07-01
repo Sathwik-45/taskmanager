@@ -264,17 +264,26 @@
 }
 
 
-      function deleteTask(id) {
-        fetch(`http://taskmanager-lq53.onrender.com/api/task/${id}`, {
-          method: "DELETE",
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            alert(data.message || "Task deleted successfully!");
-            loadTasks();
-          })
-          .catch((err) => console.error("Error deleting task:", err));
+  function deleteTask(id) {
+  fetch(`https://taskmanager-lq53.onrender.com/api/task/${id}`, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error(`Failed to delete task: ${res.status}`);
       }
+      return res.json();
+    })
+    .then((data) => {
+      alert(data.message || "Task deleted successfully!");
+      loadTasks();
+    })
+    .catch((err) => {
+      console.error("Error deleting task:", err);
+      alert("An error occurred while deleting the task.");
+    });
+}
+
 
       window.onload = loadTasks;
     </script>
