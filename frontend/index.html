@@ -1,291 +1,698 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Task Manager</title>
 
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskMaster | Professional Agency Suite</title>
 
-    <!-- Bootstrap Icons -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <style>
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        scroll-behavior: smooth;
-        font-family: 'Segoe UI', sans-serif;
-        background-color: #f4f7fa;
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary: #64748b;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.6;
+      margin: 0;
+      padding-bottom: 3rem;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 0;
+      margin-bottom: 2rem;
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      color: var(--primary) !important;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-link {
+      font-weight: 500;
+      color: var(--secondary) !important;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: var(--primary) !important;
+    }
+
+    /* Stats Section */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: var(--primary);
+    }
+
+    .stat-card p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Main Grid Wrapper */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 992px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Forms & Inputs */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 1.5rem;
+      font-weight: 600;
+    }
+
+    .form-label {
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control,
+    .form-select {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.625rem 0.875rem;
+      font-size: 0.9375rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      outline: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      padding: 0.625rem 1.25rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Task Cards */
+    .task-list-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+    }
+
+    .task-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .task-item:hover {
+      border-color: var(--primary);
+      background-color: #f8fafc;
+    }
+
+    .task-info-left {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex: 1;
+    }
+
+    .status-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .status-checkbox.checked {
+      background-color: var(--success);
+      border-color: var(--success);
+    }
+
+    .status-checkbox i {
+      color: white;
+      font-size: 0.75rem;
+      display: none;
+    }
+
+    .status-checkbox.checked i {
+      display: block;
+    }
+
+    .task-select-wrap {
+      display: flex;
+      align-items: center;
+      margin-right: 0.5rem;
+    }
+
+    .task-select-checkbox {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+
+    .task-content h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      margin-bottom: 0.25rem;
+    }
+
+    .task-content h4.completed {
+      text-decoration: line-through;
+      color: var(--secondary);
+    }
+
+    .task-meta {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--secondary);
+      flex-wrap: wrap;
+    }
+
+    .badge-pro {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.625rem;
+      font-weight: 600;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .priority-High {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .priority-Medium {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .priority-Low {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .btn-action {
+      color: var(--secondary);
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      background: transparent;
+      border: none;
+    }
+
+    .btn-action:hover {
+      background: #f1f5f9;
+      color: var(--danger);
+    }
+
+    /* Bulk Actions */
+    .bulk-actions-bar {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 0.75rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-10px);
+        opacity: 0;
       }
 
-      nav.navbar {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background-color: #003366;
+      to {
+        transform: translateY(0);
+        opacity: 1;
       }
+    }
 
-      nav .nav-link {
-        color: #fff !important;
-        font-weight: 500;
-      }
+    /* Empty State */
+    .empty-dashboard {
+      text-align: center;
+      padding: 3rem;
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      color: var(--secondary);
+    }
+  </style>
+</head>
 
-      section {
-        min-height: 100vh;
-        padding-top: 90px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background-color: #f4f7fa;
-      }
+<body>
 
-      .content-box {
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-        width: 100%;
-        max-width: 600px;
-      }
-
-      #home-section {
-        background: linear-gradient(135deg, #e3f2fd, #fce4ec);
-        text-align: center;
-      }
-
-      .home-icon {
-        font-size: 90px;
-        color: #003366;
-        animation: bounce 2s infinite;
-      }
-
-      .home-text {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #003366;
-        margin-top: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-      }
-
-      @keyframes bounce {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-10px);
-        }
-      }
-
-      .list-group-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .btn-icon-only {
-        background: none;
-        border: none;
-        color: #dc3545;
-        font-size: 1.2rem;
-      }
-
-      .btn-icon-only:hover {
-        color: #a71d2a;
-        cursor: pointer;
-      }
-    </style>
-  </head>
-
-  <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Task Manager</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link active" href="#home-section">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#task-section">Add Task</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#task-list">View Tasks</a>
-            </li>
-          </ul>
-        </div>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-grid-1x2-fill"></i>
+        TaskMaster
+      </a>
+      <div class="d-flex align-items-center gap-4">
+        <span class="text-muted small d-none d-md-block" id="currentDate"></span>
+        <i class="bi bi-person-circle fs-5 text-secondary"></i>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <!-- Home Section -->
-    <section id="home-section">
-      <div class="content-box text-center">
-        <i class="bi bi-journal-check home-icon"></i>
-        <div class="home-text">
-          <i class="bi bi-info-circle"></i>
-          Add Your TASK or Check Your Pending TASKS
-        </div>
+  <div class="container">
+    <!-- Stats Summary -->
+    <div class="stats-container" id="statsWrapper">
+      <div class="stat-card">
+        <h3 id="statTotal">0</h3>
+        <p>Total Projects</p>
       </div>
-    </section>
+      <div class="stat-card">
+        <h3 id="statPending">0</h3>
+        <p>Pending Tasks</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="statCompleted">0</h3>
+        <p>Success Rate</p>
+      </div>
+    </div>
 
-    <!-- Add Task Section -->
-    <section id="task-section">
-      <div class="content-box">
-        <h2 class="text-center mb-4">
-          <i class="bi bi-plus-circle"></i> Add New Task
-        </h2>
-        <form id="leadform">
-          <div class="mb-3">
-            <label for="task" class="form-label">Task:</label>
-            <input
-              type="text"
-              name="task"
-              id="task"
-              class="form-control"
-              required
-            />
+    <div class="dashboard-grid">
+      <!-- New Task Section (Sidebar) -->
+      <aside>
+        <div class="card">
+          <div class="card-header">
+            Create New Task
           </div>
-          <div class="mb-3">
-            <label for="deadline" class="form-label">Deadline:</label>
-            <input
-              type="text"
-              name="deadline"
-              id="deadline"
-              class="form-control"
-              required
-            />
+          <div class="card-body">
+            <form id="taskForm">
+              <div class="mb-3">
+                <label class="form-label">Task Objective</label>
+                <input type="text" id="taskTitle" class="form-control" placeholder="e.g. Q1 Content Strategy" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Deadline</label>
+                <input type="date" id="taskDeadline" class="form-control" required>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <label class="form-label">Priority</label>
+                  <select id="taskPriority" class="form-select">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Category</label>
+                  <select id="taskCategory" class="form-select">
+                    <option value="General">General</option>
+                    <option value="Work">Campaign</option>
+                    <option value="Personal">Creative</option>
+                    <option value="Urgent">Strategy</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Objective Details</label>
+                <textarea id="taskDescription" class="form-control" rows="3"
+                  placeholder="Brief description of requirements..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                Deploy Task
+              </button>
+            </form>
           </div>
-          <button type="submit" class="btn btn-primary w-100">
-            Submit
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main>
+        <div class="task-list-title">
+          <div class="d-flex align-items-center gap-3">
+            <h2 class="h5 mb-0 fw-bold">Active Projects</h2>
+            <div class="form-check small mb-0 pt-1">
+              <input class="form-check-input" type="checkbox" id="selectAllTasks">
+              <label class="form-check-label text-muted" for="selectAllTasks">Select All</label>
+            </div>
+          </div>
+          <select id="filterPriority" class="form-select form-select-sm" style="width: 140px;">
+            <option value="All">All Tiers</option>
+            <option value="High">High Priority</option>
+            <option value="Medium">Mid Tier</option>
+            <option value="Low">Standard</option>
+          </select>
+        </div>
+
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-actions-bar" id="bulkActionsBar">
+          <span class="text-primary fw-600 small" id="selectedCountText">0 items selected</span>
+          <button class="btn btn-danger btn-sm px-3" onclick="deleteSelectedTasks()">
+            <i class="bi bi-trash3 me-2"></i> Bulk Archive
           </button>
-        </form>
-      </div>
-    </section>
+        </div>
 
-    <!-- View Tasks Section -->
-    <section id="task-list">
-      <div class="content-box">
-        <h2 class="text-center mb-4">
-          <i class="bi bi-list-task"></i> Manage Tasks
-        </h2>
-        <ul id="tasks" class="list-group">
-          <!-- Task items will appear here -->
-        </ul>
-      </div>
-    </section>
+        <div id="tasksContainer">
+          <!-- Dynamic task cards -->
+        </div>
+      </main>
+    </div>
+  </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Script Logic -->
-    <script>
-      document
-        .getElementById("leadform")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
+  <script>
+    // Robustly detect if we should use local or production API
+    const isLocal = window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname === "" ||
+      window.location.protocol === 'file:';
 
-          const task = document.getElementById("task").value;
-          const deadline = document.getElementById("deadline").value;
+    const API_BASE = isLocal ? "http://localhost:5000/api" : "https://taskmanager-lq53.onrender.com/api";
+    console.log("TaskMaster Sync: Initializing on", isLocal ? "LOCAL" : "PRODUCTION", "at", API_BASE);
 
-          if (task && deadline) {
-            fetch("https://taskmanager-lq53.onrender.com/api/task", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ task, deadline }),
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                alert(data.message || "Task submitted successfully!");
-                document.getElementById("leadform").reset();
-                loadTasks();
-              })
-              .catch((err) => {
-                alert("Failed to submit task.");
-                console.error(err);
-              });
-          } else {
-            alert("Please fill in both fields.");
-          }
+    let tasksData = [];
+    let selectedIds = new Set();
+
+    // Set Real Date
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Notify Helper
+    function notify(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.style = `position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; border-radius: 8px; color: white; z-index: 10000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease-out; background: ${type === 'success' ? '#10b981' : '#ef4444'}`;
+      toast.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i> ${msg}`;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s';
+        setTimeout(() => toast.remove(), 500);
+      }, 3000);
+    }
+
+    const style = document.createElement('style');
+    style.innerHTML = `@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }`;
+    document.head.appendChild(style);
+
+    // Form Submit
+    document.getElementById("taskForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.innerText = 'Syncing...';
+
+      const payload = {
+        task: document.getElementById("taskTitle").value,
+        deadline: document.getElementById("taskDeadline").value,
+        priority: document.getElementById("taskPriority").value,
+        category: document.getElementById("taskCategory").value,
+        description: document.getElementById("taskDescription").value
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/task`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
 
-   function loadTasks() {
-  fetch("https://taskmanager-lq53.onrender.com/api/tasks")
-    .then((res) => res.json())
-    .then((tasks) => {
-      console.log("Fetched tasks:", tasks); // Helps you debug
-
-      // Check if response is an array
-      if (!Array.isArray(tasks)) {
-        throw new Error("Expected array, got: " + JSON.stringify(tasks));
+        const data = await res.json();
+        if (res.ok) {
+          notify("Task deployed to agency cloud.");
+          e.target.reset();
+          loadTasks();
+        } else {
+          notify(data.message || "Deployment failed.", "error");
+        }
+      } catch (err) {
+        console.error(err);
+        notify("Check server connection.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Deploy Task';
       }
-
-      const taskList = document.getElementById("tasks");
-      taskList.innerHTML = "";
-
-      tasks.forEach((task) => {
-        const taskItem = document.createElement("li");
-        taskItem.classList.add("list-group-item");
-        taskItem.innerHTML = `
-          <span><strong>${task.task}</strong> - ${task.deadline}</span>
-          <button class="btn-icon-only" onclick="deleteTask('${task._id}')">
-            <i class="bi bi-trash-fill"></i>
-          </button>
-        `;
-        taskList.appendChild(taskItem);
-      });
-    })
-    .catch((err) => console.error("Error fetching tasks:", err));
-}
-
-
-  function deleteTask(id) {
-  fetch(`https://taskmanager-lq53.onrender.com/api/task/${id}`, {
-    method: "DELETE",
-  })
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error(`Failed to delete task: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then((data) => {
-      alert(data.message || "Task deleted successfully!");
-      loadTasks();
-    })
-    .catch((err) => {
-      console.error("Error deleting task:", err);
-      alert("An error occurred while deleting the task.");
     });
-}
 
+    async function loadTasks() {
+      try {
+        const res = await fetch(`${API_BASE}/tasks`);
+        const data = await res.json();
 
-      window.onload = loadTasks;
-    </script>
-  </body>
+        if (Array.isArray(data)) {
+          tasksData = data;
+        } else {
+          console.error("Expected array, got:", data);
+          tasksData = [];
+          if (data.message) notify(data.message, "error");
+        }
+
+        selectedIds.clear();
+        document.getElementById('selectAllTasks').checked = false;
+        renderUI();
+      } catch (err) {
+        console.error("Fetch error:", err);
+        notify("Backend unreachable. Is 'npm start' running?", "error");
+        tasksData = [];
+        renderUI();
+      }
+    }
+
+    function renderUI() {
+      const container = document.getElementById("tasksContainer");
+      const filter = document.getElementById("filterPriority").value;
+      const filtered = filter === "All" ? tasksData : tasksData.filter(t => t.priority === filter);
+
+      updateStats();
+      updateBulkBar();
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+                    <div class="empty-dashboard">
+                        <i class="bi bi-clipboard-pulse fs-1 d-block mb-3 opacity-25"></i>
+                        No active projects matches selected criteria.
+                    </div>
+                `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(task => `
+                <div class="task-item">
+                    <div class="task-info-left">
+                        <div class="task-select-wrap">
+                            <input type="checkbox" class="task-select-checkbox" 
+                                   ${selectedIds.has(task._id) ? 'checked' : ''} 
+                                   onchange="toggleTaskSelection('${task._id}')">
+                        </div>
+                        <div class="status-checkbox ${task.status === 'Completed' ? 'checked' : ''}" 
+                             onclick="toggleStatus('${task._id}', '${task.status}')">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        <div class="task-content">
+                            <h4 class="${task.status === 'Completed' ? 'completed' : ''}">${task.task}</h4>
+                            <div class="task-meta">
+                                <span><i class="bi bi-calendar3 me-1"></i> ${new Date(task.deadline).toLocaleDateString()}</span>
+                                <span class="badge-pro priority-${task.priority}">${task.priority}</span>
+                                <span><i class="bi bi-tag me-1"></i> ${task.category}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="deleteTask('${task._id}')" class="btn-action" title="Archive">
+                        <i class="bi bi-archive"></i>
+                    </button>
+                </div>
+            `).join('');
+    }
+
+    // Selection Logic
+    function toggleTaskSelection(id) {
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+      } else {
+        selectedIds.add(id);
+      }
+      updateBulkBar();
+
+      // Sync "Select All" state
+      const filter = document.getElementById("filterPriority").value;
+      const filtered = filter === "All" ? tasksData : tasksData.filter(t => t.priority === filter);
+      document.getElementById('selectAllTasks').checked = filtered.length > 0 && Array.from(filtered).every(t => selectedIds.has(t._id));
+    }
+
+    document.getElementById('selectAllTasks').addEventListener('change', (e) => {
+      const filter = document.getElementById("filterPriority").value;
+      const filtered = filter === "All" ? tasksData : tasksData.filter(t => t.priority === filter);
+
+      if (e.target.checked) {
+        filtered.forEach(task => selectedIds.add(task._id));
+      } else {
+        filtered.forEach(task => selectedIds.delete(task._id));
+      }
+      renderUI();
+    });
+
+    function updateBulkBar() {
+      const bar = document.getElementById('bulkActionsBar');
+      const countText = document.getElementById('selectedCountText');
+
+      if (selectedIds.size > 0) {
+        bar.style.display = 'flex';
+        countText.innerText = `${selectedIds.size} items selected`;
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    function updateStats() {
+      const total = tasksData.length;
+      const completed = tasksData.filter(t => t.status === 'Completed').length;
+      const pending = total - completed;
+      const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      document.getElementById('statTotal').innerText = total;
+      document.getElementById('statPending').innerText = pending;
+      document.getElementById('statCompleted').innerText = `${rate}%`;
+    }
+
+    async function toggleStatus(id, currentStatus) {
+      const newStatus = currentStatus === 'Completed' ? 'Pending' : 'Completed';
+      try {
+        await fetch(`${API_BASE}/task/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        loadTasks();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function deleteTask(id) {
+      if (!confirm("Are you sure you want to archive this task?")) return;
+      try {
+        await fetch(`${API_BASE}/task/${id}`, { method: "DELETE" });
+        loadTasks();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function deleteSelectedTasks() {
+      if (!confirm(`Are you sure you want to archive ${selectedIds.size} selected tasks?`)) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/tasks/bulk`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: Array.from(selectedIds) }),
+        });
+
+        if (res.ok) {
+          loadTasks();
+        } else {
+          alert("Bulk deletion failed.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error during bulk operation.");
+      }
+    }
+
+    document.getElementById("filterPriority").addEventListener("change", () => {
+      renderUI();
+    });
+
+    // Initial Boot
+    window.onload = loadTasks;
+  </script>
+</body>
+
 </html>
