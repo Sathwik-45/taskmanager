@@ -19,6 +19,7 @@ if (!dbURI) {
 
 mongoose.connect(dbURI, {
   serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds instead of 30
+  family: 4 // Force IPv4, helps fix ENOTFOUND DNS issues
 })
   .then(() => {
     console.log('Connected to MongoDB Atlas');
@@ -30,11 +31,13 @@ mongoose.connect(dbURI, {
 // Task Schema
 const leadSchema = new mongoose.Schema({
   task: { type: String, required: true },
-  deadline: { type: String, required: true },
+  deadline: { type: String, default: '' },
   priority: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Medium' },
   category: { type: String, default: 'General' },
   status: { type: String, enum: ['Pending', 'Completed'], default: 'Pending' },
   description: { type: String, default: '' },
+  alarmTime: { type: String, default: '' },
+  recurrence: { type: String, enum: ['Once', 'Daily'], default: 'Once' }
 }, { timestamps: true });
 
 const Lead = mongoose.model("Lead", leadSchema);
@@ -43,18 +46,23 @@ const Lead = mongoose.model("Lead", leadSchema);
 app.post("/api/task", async (req, res) => {
   try {
     console.log("Received data:", req.body);
-    const { task, deadline, priority, category, description } = req.body;
+    const { task, deadline, priority, category, description, alarmTime, recurrence } = req.body;
 
-    if (!task || !deadline) {
-      return res.status(400).json({ message: "Task and deadline are required." });
+    if (!task) {
+      return res.status(400).json({ message: "Task title is required." });
+    }
+    if (recurrence === 'Once' && !deadline) {
+      return res.status(400).json({ message: "Deadline is required for one-time tasks." });
     }
 
     const newLead = new Lead({
       task,
-      deadline,
+      deadline: deadline || '',
       priority: priority || 'Medium',
       category: category || 'General',
-      description: description || ''
+      description: description || '',
+      alarmTime: alarmTime || '',
+      recurrence: recurrence || 'Once'
     });
     await newLead.save();
 

@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaskMaster | Professional Agency Suite</title>
+  <link rel="manifest" href="manifest.json">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -376,8 +377,21 @@
                 <input type="text" id="taskTitle" class="form-control" placeholder="e.g. Q1 Content Strategy" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Deadline</label>
-                <input type="date" id="taskDeadline" class="form-control" required>
+                <label class="form-label">Event Type</label>
+                <select id="taskRecurrence" class="form-select" onchange="toggleDeadlineField()">
+                  <option value="Once" selected>One-time (Specific Date)</option>
+                  <option value="Daily">Daily Recurring Event</option>
+                </select>
+              </div>
+              <div class="row mb-3">
+                <div class="col-7" id="deadlineWrapper">
+                  <label class="form-label">Deadline</label>
+                  <input type="date" id="taskDeadline" class="form-control" required>
+                </div>
+                <div class="col-5">
+                  <label class="form-label">Alarm</label>
+                  <input type="time" id="taskAlarmTime" class="form-control">
+                </div>
               </div>
               <div class="row mb-3">
                 <div class="col-6">
@@ -437,8 +451,22 @@
           </button>
         </div>
 
-        <div id="tasksContainer">
-          <!-- Dynamic task cards -->
+        <div>
+          <h2 class="h5 mb-3 fw-bold text-primary border-bottom pb-2">
+            <i class="bi bi-arrow-repeat me-2"></i>Daily Events
+          </h2>
+          <div id="dailyEventsContainer" class="mb-5">
+            <!-- Dynamic Daily Cards -->
+          </div>
+        </div>
+
+        <div>
+          <h2 class="h5 mb-3 fw-bold border-bottom pb-2">
+            <i class="bi bi-calendar-event me-2"></i>Date Specific Projects
+          </h2>
+          <div id="tasksContainer">
+            <!-- Dynamic task cards -->
+          </div>
         </div>
       </main>
     </div>
@@ -482,6 +510,21 @@
     style.innerHTML = `@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }`;
     document.head.appendChild(style);
 
+    // Toggle Deadline Field
+    function toggleDeadlineField() {
+      const type = document.getElementById("taskRecurrence").value;
+      const wrap = document.getElementById("deadlineWrapper");
+      const input = document.getElementById("taskDeadline");
+      if (type === 'Daily') {
+        wrap.style.display = 'none';
+        input.removeAttribute('required');
+        input.value = '';
+      } else {
+        wrap.style.display = 'block';
+        input.setAttribute('required', 'true');
+      }
+    }
+
     // Form Submit
     document.getElementById("taskForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -494,8 +537,15 @@
         deadline: document.getElementById("taskDeadline").value,
         priority: document.getElementById("taskPriority").value,
         category: document.getElementById("taskCategory").value,
-        description: document.getElementById("taskDescription").value
+        description: document.getElementById("taskDescription").value,
+        alarmTime: document.getElementById("taskAlarmTime").value,
+        recurrence: document.getElementById("taskRecurrence").value
       };
+
+      // Request push approval simply if alarm is set
+      if (payload.alarmTime && 'Notification' in window && Notification.permission !== 'granted') {
+          Notification.requestPermission();
+      }
 
       try {
         const res = await fetch(`${API_BASE}/task`, {
@@ -547,23 +597,30 @@
 
     function renderUI() {
       const container = document.getElementById("tasksContainer");
+      const dailyContainer = document.getElementById("dailyEventsContainer");
       const filter = document.getElementById("filterPriority").value;
       const filtered = filter === "All" ? tasksData : tasksData.filter(t => t.priority === filter);
 
       updateStats();
       updateBulkBar();
 
-      if (filtered.length === 0) {
-        container.innerHTML = `
-                    <div class="empty-dashboard">
-                        <i class="bi bi-clipboard-pulse fs-1 d-block mb-3 opacity-25"></i>
-                        No active projects matches selected criteria.
-                    </div>
-                `;
-        return;
-      }
-
-      container.innerHTML = filtered.map(task => `
+      const dailyTasks = filtered.filter(t => t.recurrence === 'Daily');
+      const onceTasks = filtered.filter(t => t.recurrence !== 'Daily');
+      
+      function buildTaskHTML(task) {
+        let metaHtml = '';
+        if (task.recurrence === 'Daily') {
+          metaHtml += `<span class="text-primary fw-bold"><i class="bi bi-arrow-repeat me-1"></i> Daily</span>`;
+        } else if (task.deadline) {
+          const dateStr = new Date(task.deadline).toLocaleDateString();
+          metaHtml += `<span><i class="bi bi-calendar3 me-1"></i> ${dateStr !== 'Invalid Date' ? dateStr : 'No Date'}</span>`;
+        }
+        
+        if (task.alarmTime) {
+           metaHtml += `<span class="text-danger fw-bold ms-3"><i class="bi bi-alarm-fill me-1"></i> ${task.alarmTime}</span>`;
+        }
+        
+        return `
                 <div class="task-item">
                     <div class="task-info-left">
                         <div class="task-select-wrap">
@@ -575,12 +632,13 @@
                              onclick="toggleStatus('${task._id}', '${task.status}')">
                             <i class="bi bi-check-lg"></i>
                         </div>
-                        <div class="task-content">
+                        <div class="task-content w-100">
                             <h4 class="${task.status === 'Completed' ? 'completed' : ''}">${task.task}</h4>
-                            <div class="task-meta">
-                                <span><i class="bi bi-calendar3 me-1"></i> ${new Date(task.deadline).toLocaleDateString()}</span>
-                                <span class="badge-pro priority-${task.priority}">${task.priority}</span>
-                                <span><i class="bi bi-tag me-1"></i> ${task.category}</span>
+                            ${task.description ? `<p class="small text-muted mb-1">${task.description}</p>` : ''}
+                            <div class="task-meta mt-1 align-items-center">
+                                ${metaHtml}
+                                <span class="badge-pro priority-${task.priority} ms-3">${task.priority}</span>
+                                <span class="ms-3"><i class="bi bi-tag me-1"></i> ${task.category}</span>
                             </div>
                         </div>
                     </div>
@@ -588,7 +646,25 @@
                         <i class="bi bi-archive"></i>
                     </button>
                 </div>
-            `).join('');
+            `;
+      }
+
+      if (dailyTasks.length === 0) {
+        if (dailyContainer) dailyContainer.innerHTML = `<div class="text-muted small py-3 fst-italic"><i class="bi bi-info-circle me-2"></i> No active daily events.</div>`;
+      } else {
+        if (dailyContainer) dailyContainer.innerHTML = dailyTasks.map(buildTaskHTML).join('');
+      }
+
+      if (onceTasks.length === 0) {
+        if (container) container.innerHTML = `
+                    <div class="empty-dashboard">
+                        <i class="bi bi-clipboard-pulse fs-1 d-block mb-3 opacity-25"></i>
+                        No active standard projects found.
+                    </div>
+                `;
+      } else {
+        if (container) container.innerHTML = onceTasks.map(buildTaskHTML).join('');
+      }
     }
 
     // Selection Logic
@@ -690,8 +766,73 @@
       renderUI();
     });
 
+    // --- Frontend-Only Local Alarm Logic ---
+    let lastAlarmMinuteStr = "";
+
+    function startAlarmLoop() {
+      setInterval(() => {
+        if (!tasksData || tasksData.length === 0) return;
+        
+        const now = new Date();
+        const yyyyMmDd = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, '0') + "-" + String(now.getDate()).padStart(2, '0');
+        const currentHHMM = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        
+        // Prevent multiple triggers in the same minute globally
+        if (currentHHMM === lastAlarmMinuteStr) return;
+
+        let triggeredTasks = [];
+
+        tasksData.forEach(task => {
+          if (task.status !== 'Pending' || !task.alarmTime) return;
+          
+          if (task.recurrence === 'Daily') {
+             if (task.alarmTime === currentHHMM) triggeredTasks.push(task);
+          } else {
+             // Specific Date
+             if (task.deadline === yyyyMmDd && task.alarmTime === currentHHMM) {
+                triggeredTasks.push(task);
+             }
+          }
+        });
+
+        if (triggeredTasks.length > 0) {
+          lastAlarmMinuteStr = currentHHMM;
+          triggerAlarm(triggeredTasks);
+        }
+      }, 30000); // Check every 30 seconds
+    }
+
+    function triggerAlarm(tasks) {
+       // Play a loud buzzer sound (free mixkit sound)
+       const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+       audio.play().catch(e => console.log('Audio autoplay blocked by browser', e));
+       
+       const taskNames = tasks.map(t => t.task).join(', ');
+       
+       if ('Notification' in window && Notification.permission === 'granted') {
+         new Notification('TaskMaster Reminder', {
+           body: `Time for: ${taskNames}`
+         });
+       } else {
+         // Use setTimeout to prevent the alert() popup from freezing the browser thread
+         // which blocks the audio from physically playing until the user clicks OK.
+         setTimeout(() => {
+            alert(`Buzzer! It is time for: ${taskNames}`);
+         }, 100);
+       }
+    }
+
     // Initial Boot
-    window.onload = loadTasks;
+    window.onload = () => {
+      loadTasks();
+      
+      // Request notification on load so we can push alerts later
+      if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+      }
+      
+      startAlarmLoop();
+    };
   </script>
 </body>
 
